@@ -65,6 +65,98 @@ namespace backSupre.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("ListaDesactivos")]
+        public IActionResult ListaDesactivos()
+        {
+            List<TercerosModels> lista = new List<TercerosModels>();
+
+            try
+            {
+
+                using (var conexion = new SqlConnection(cadenaSQL))
+                {
+                    conexion.Open();
+                    var cmd = new SqlCommand("listar_user_inactivo", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var rd = cmd.ExecuteReader())
+                    {
+
+                        while (rd.Read())
+                        {
+
+                            lista.Add(new TercerosModels
+                            {
+                                Id = Convert.ToInt32(rd["id"]),
+                                primer_nombre = rd["primer_nombre"].ToString(),
+                                segundo_nombre = rd["segundo_nombre"].ToString(),
+                                primer_apellido = rd["primer_apellido"].ToString(),
+                                segundo_apellido = rd["segundo_apellido"].ToString(),
+                                iden = rd["iden"].ToString(),
+                                tipo_iden = rd["tipo_iden"].ToString(),
+                                direccion = rd["direccion"].ToString(),
+                                email = rd["email"].ToString(),
+                            });
+                        }
+
+                    }
+                }
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista });
+            }
+            catch (Exception error)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = lista });
+
+            }
+        }
+
+        [HttpGet]
+        [Route("ListaInactivo")]
+        public IActionResult ListaInactivo()
+        {
+            List<TercerosModels> lista = new List<TercerosModels>();
+
+            try
+            {
+
+                using (var conexion = new SqlConnection(cadenaSQL))
+                {
+                    conexion.Open();
+                    var cmd = new SqlCommand("listar_user", conexion);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var rd = cmd.ExecuteReader())
+                    {
+
+                        while (rd.Read())
+                        {
+
+                            lista.Add(new TercerosModels
+                            {
+                                Id = Convert.ToInt32(rd["id"]),
+                                primer_nombre = rd["primer_nombre"].ToString(),
+                                segundo_nombre = rd["segundo_nombre"].ToString(),
+                                primer_apellido = rd["primer_apellido"].ToString(),
+                                segundo_apellido = rd["segundo_apellido"].ToString(),
+                                iden = rd["iden"].ToString(),
+                                tipo_iden = rd["tipo_iden"].ToString(),
+                                direccion = rd["direccion"].ToString(),
+                                email = rd["email"].ToString(),
+                            });
+                        }
+
+                    }
+                }
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", response = lista });
+            }
+            catch (Exception error)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message, response = lista });
+
+            }
+        }
+
 
 
         [HttpGet]
@@ -123,9 +215,10 @@ namespace backSupre.Controllers
         {
             try
             {
-
+                Console.WriteLine("El resuldato es: {0} ", objeto);
                 using (var conexion = new SqlConnection(cadenaSQL))
                 {
+                    Console.WriteLine("conexion es: {0} ", conexion);
                     conexion.Open();
                     var cmd = new SqlCommand("create_user", conexion);
                     cmd.Parameters.AddWithValue("tipo_iden", objeto.tipo_iden);
@@ -134,12 +227,13 @@ namespace backSupre.Controllers
                     cmd.Parameters.AddWithValue("segundo_nombre", objeto.segundo_nombre);
                     cmd.Parameters.AddWithValue("primer_apellido", objeto.primer_apellido);
                     cmd.Parameters.AddWithValue("segundo_apellido", objeto.segundo_apellido);
-                    cmd.Parameters.AddWithValue("razon_social", objeto.razon_social);
+                    cmd.Parameters.AddWithValue("razon_social", objeto.razon_social); 
                     cmd.Parameters.AddWithValue("fecha_expedicion", objeto.fecha_expedicion);
                     cmd.Parameters.AddWithValue("fecha_nacimiento", objeto.fecha_nacimiento);
+                    cmd.Parameters.AddWithValue("id_cuenta_fiscal", objeto.id_cuenta_fiscal);
                     cmd.Parameters.AddWithValue("direccion", objeto.direccion);
                     cmd.Parameters.AddWithValue("email", objeto.email);
-                    cmd.Parameters.AddWithValue("cecular", objeto.cecular);
+                    cmd.Parameters.AddWithValue("celular", objeto.celular);
                     cmd.Parameters.AddWithValue("estado", objeto.estado);
 
 
@@ -170,7 +264,34 @@ namespace backSupre.Controllers
                     conexion.Open();
                     var cmd = new SqlCommand("update_estado_user", conexion);
                     cmd.Parameters.AddWithValue("id", objeto.Id == 0 ? DBNull.Value : objeto.Id);
-                    cmd.Parameters.AddWithValue("estado", objeto.estado == 0 ? DBNull.Value : objeto.estado);
+                    cmd.Parameters.AddWithValue("estado", objeto.estado == false ? DBNull.Value : objeto.estado);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.ExecuteNonQuery();
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = "editado" });
+            }
+            catch (Exception error)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = error.Message });
+
+            }
+        }
+
+        [HttpPut]
+        [Route("EditarEstado/{id:int}")]
+        public IActionResult EditarEstado( int id, [FromBody]  Boolean estado)
+        {
+            try
+            {
+
+                using (var conexion = new SqlConnection(cadenaSQL))
+                {
+                    conexion.Open();
+                    var cmd = new SqlCommand("update_estado_user", conexion);
+                    cmd.Parameters.AddWithValue("id", id == 0 ? DBNull.Value : id);
+                    cmd.Parameters.AddWithValue("estado", estado);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
